@@ -1,5 +1,8 @@
 <template>
-  <ly-tree></ly-tree>
+  <div>
+    <ly-tree></ly-tree>
+    <ly-tree></ly-tree>
+  </div>
 </template>
 
 <script>

@@ -1,0 +1,50 @@
+// {
+//     // 使用 IntelliSense 了解相关属性。 
+//     // 悬停以查看现有属性的描述。
+//     // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+//     "version": "0.2.0",
+//     "configurations": [
+//         {
+//             "type": "chrome",
+//             "request": "launch",
+//             "name": "针对 localhost 启动 Chrome",
+//             "url": "http://localhost:8080",
+//             "webRoot": "${workspaceFolder}"
+//         }
+//     ]
+// }
+
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        // 使用 Edge 浏览器调试
+        //"type": "msedge",
+        // 使用 Chrome 浏览器调试
+        "type": "chrome",
+  
+        "request": "launch",
+        //"name": "vuejs: msedge",
+        "name": "vuejs: chrome",
+  
+        // 项目的访问地址（需要改成你项目开发环境对应的地址和端口号）
+        "url": "http://localhost:8080",
+  
+        "webRoot": "${workspaceFolder}",
+        "pathMapping": {
+          "/_karma_webpack_": "${workspaceFolder}"
+        },
+        "sourceMapPathOverrides": {
+          "webpack:/*": "${webRoot}/*",
+          "/./*": "${webRoot}/*",
+          "/src/*": "${webRoot}/*",
+          "/*": "*",
+          "/./~/*": "${webRoot}/node_modules/*"
+        },
+  
+        // 设置进入 debug 环境之前需要执行的任务。
+        // 此名称对应项目中 .vscode 目录下 tasks.json 文件中的 label 属性）
+        "preLaunchTask": "vuejs: start"
+      }
+    ]
+  }

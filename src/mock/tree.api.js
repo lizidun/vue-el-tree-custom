@@ -1,33 +1,76 @@
+import axios from 'axios'
+import qs from 'qs'
+
 let id = 1000
 
 export let data = [
-  {
-    "id": 1,
-    "name": "技术部",
-    "level": 1,
-    "child": [
-      {
-        "id": 2,
-        "name": "运维组",
-        "level": 2,
-        "child": [
-          {
-            "id": 3,
-            "name": "godo",
-            "level": 3,
-            "child": []
-          }
-        ]
-      },
-      {
-        "id": 4,
-        "name": "测试组",
-        "level": 2,
-        "child": []
-      }
-    ]
-  }
+  // {
+  //   "id": 1,
+  //   "name": "技术部",
+  //   "level": 1,
+  //   "child": [
+  //     {
+  //       "id": 2,
+  //       "name": "运维组",
+  //       "level": 2,
+  //       "child": [
+  //         {
+  //           "id": 3,
+  //           "name": "godo",
+  //           "level": 3,
+  //           "child": []
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       "id": 4,
+  //       "name": "测试组",
+  //       "level": 2,
+  //       "child": []
+  //     }
+  //   ]
+  // }
 ]
+
+export let initData = (level) => {
+  const dataToList = qs.stringify({
+  }, { indices: false })
+  axios({
+    method: 'post',
+    url: 'http://81.68.153.95:8520/api/v' + level + '/List',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    data: dataToList,
+  }).then(response => {
+    console.log(response.data);
+    for (let nIndex = 0; nIndex < response.data.data.length; nIndex++) {
+      data.push({ "id": response.data.data[nIndex]["id"], "uuid": response.data.data[nIndex]["uuid"], "name": response.data.data[nIndex]["content"], "level": level, "child": [] });
+
+      //////////////////////////////
+      const dataChild = qs.stringify({
+      }, { indices: false })
+      axios({
+        method: 'post',
+        url: 'http://81.68.153.95:8520/api/v' + (level + 1) + '/List',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data: dataChild,
+      }).then(response => {
+        console.log(response.data);
+        if (response.data.data.length > 0) {
+          initData(level + 1);
+        }
+        console.log(data);
+      });
+      //////////////////////////////
+    }
+    console.log(data);
+  });
+}
+
+initData(1);
 
 export let getServiceTree = () => {
   return {
@@ -39,9 +82,26 @@ export let getServiceTree = () => {
 }
 
 export let delItem = (data, payload) => {
-  for(let i = 0; i < data.length; i++) {
+  for (let i = 0; i < data.length; i++) {
     if (data[i].id === payload.id) {
       data.splice(i, 1)
+
+      const dataToDelete = qs.stringify({
+        uuid: data[i].uuid
+      }, { indices: false })
+      axios({
+        method: 'post',
+        url: 'http://81.68.153.95:8520/api/v' + data[i].level + '/Delete',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data: dataToDelete,
+      }).then(response => {
+        console.log(response.data);
+      }).catch(error => {
+        console.log(error);
+      });
+
       break
     }
     if (data[i].child && data[i].child.length) {
@@ -52,7 +112,7 @@ export let delItem = (data, payload) => {
 
 export let addItem = (data, payload) => {
   let addObj
-  for(let i = 0; i < data.length; i++) {
+  for (let i = 0; i < data.length; i++) {
     if (data[i].id === payload.id) {
       addObj = {
         id: id++,
@@ -61,6 +121,26 @@ export let addItem = (data, payload) => {
         child: []
       }
       data[i].child.unshift(addObj)
+
+      const dataToCreate = qs.stringify({
+        uuid: 2,
+        parent_uuid: 2,
+        content: payload.name,
+        create_by: ""
+      }, { indices: false })
+      axios({
+        method: 'post',
+        url: 'http://81.68.153.95:8520/api/v' + (data[i].level + 1) + '/Create',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data: dataToCreate,
+      }).then(response => {
+        console.log(response.data);
+      }).catch(error => {
+        console.log(error);
+      });
+
       break
     }
 
@@ -71,7 +151,7 @@ export let addItem = (data, payload) => {
 }
 
 export let updateItem = (data, payload) => {
-  for(let i = 0; i < data.length; i++) {
+  for (let i = 0; i < data.length; i++) {
     if (data[i].id === payload.id) {
       data[i].name = payload.name
       break

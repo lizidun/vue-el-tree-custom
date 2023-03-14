@@ -1,0 +1,12 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "vuejs: start",
+        "type": "npm",
+        // 需要执行的命令（对应于 package.json 中的 scripts 命令）
+        "script": "dev",
+        "isBackground": true
+      }
+    ]
+  }
