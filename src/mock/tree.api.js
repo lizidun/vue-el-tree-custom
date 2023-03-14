@@ -32,7 +32,30 @@ export let data = [
   // }
 ]
 
-export let initData = (level) => {
+export let initDataV1 = (level) => {
+  const dataToList = qs.stringify({
+  }, { indices: false })
+  axios({
+    method: 'post',
+    url: 'http://81.68.153.95:8520/api/v' + level + '/List',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    data: dataToList,
+  }).then(response => {
+
+    console.log(response.data);
+
+    for (let nIndex = 0; nIndex < response.data.data.length; nIndex++) {
+      data.push({ "id": response.data.data[nIndex]["id"], "uuid": response.data.data[nIndex]["uuid"], "name": response.data.data[nIndex]["content"], "level": level, "child": dataTemp });
+      };
+    console.log(data);
+  });
+}
+
+export let dataTemp = []
+
+export let initDataV2 = (level) => {
   const dataToList = qs.stringify({
   }, { indices: false })
   axios({
@@ -45,32 +68,16 @@ export let initData = (level) => {
   }).then(response => {
     console.log(response.data);
     for (let nIndex = 0; nIndex < response.data.data.length; nIndex++) {
-      data.push({ "id": response.data.data[nIndex]["id"], "uuid": response.data.data[nIndex]["uuid"], "name": response.data.data[nIndex]["content"], "level": level, "child": [] });
-
-      //////////////////////////////
-      const dataChild = qs.stringify({
-      }, { indices: false })
-      axios({
-        method: 'post',
-        url: 'http://81.68.153.95:8520/api/v' + (level + 1) + '/List',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        data: dataChild,
-      }).then(response => {
-        console.log(response.data);
-        if (response.data.data.length > 0) {
-          initData(level + 1);
-        }
-        console.log(data);
-      });
-      //////////////////////////////
+      dataTemp.push({ "id": response.data.data[nIndex]["id"], "uuid": response.data.data[nIndex]["uuid"], "name": response.data.data[nIndex]["content"], "level": level, "child": [] });
     }
-    console.log(data);
+    console.log(dataTemp);
+
+    return dataTemp;
   });
 }
 
-initData(1);
+initDataV2(2);
+initDataV1(1);
 
 export let getServiceTree = () => {
   return {
@@ -84,7 +91,6 @@ export let getServiceTree = () => {
 export let delItem = (data, payload) => {
   for (let i = 0; i < data.length; i++) {
     if (data[i].id === payload.id) {
-      data.splice(i, 1)
 
       const dataToDelete = qs.stringify({
         uuid: data[i].uuid
@@ -101,6 +107,8 @@ export let delItem = (data, payload) => {
       }).catch(error => {
         console.log(error);
       });
+
+      data.splice(i, 1)
 
       break
     }
@@ -123,10 +131,10 @@ export let addItem = (data, payload) => {
       data[i].child.unshift(addObj)
 
       const dataToCreate = qs.stringify({
-        uuid: 2,
-        parent_uuid: 2,
+        uuid: "uuid",
+        parent_uuid: data[i].uuid,
         content: payload.name,
-        create_by: ""
+        create_by: "lizidun"
       }, { indices: false })
       axios({
         method: 'post',
